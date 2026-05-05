@@ -1,32 +1,31 @@
 import type { RatingSource } from "./omdb";
 
-const WEIGHTS: Record<string, number> = {
-  "IMDb": 0.45,
-  "Rotten Tomatoes": 0.35,
-  "Metacritic": 0.20,
-};
-
-export function calculateMovieMetric(
+export function calculateCineScore(
   ratings: RatingSource[],
   tmdbScore: number | null
 ): number | null {
+  const findScore = (source: string) =>
+    ratings.find((r) => r.source === source)?.normalizedScore ?? null;
+
+  const imdb = findScore("IMDb");
+  const rt = findScore("Rotten Tomatoes");
+  const meta = findScore("Metacritic");
+  const letterboxd = tmdbScore != null ? Math.round((tmdbScore / 10) * 100) : null;
+
   let weightedSum = 0;
   let totalWeight = 0;
 
-  for (const rating of ratings) {
-    const weight = WEIGHTS[rating.source];
-    if (weight && rating.normalizedScore !== null) {
-      weightedSum += rating.normalizedScore * weight;
+  const addScore = (score: number | null, weight: number) => {
+    if (score !== null) {
+      weightedSum += score * weight;
       totalWeight += weight;
     }
-  }
+  };
 
-  if (tmdbScore !== null && tmdbScore > 0) {
-    const tmdbNormalized = Math.round((tmdbScore / 10) * 100);
-    const tmdbWeight = totalWeight > 0 ? 0.1 : 1.0;
-    weightedSum += tmdbNormalized * tmdbWeight;
-    totalWeight += tmdbWeight;
-  }
+  addScore(imdb, 0.2);
+  addScore(rt, 0.2);
+  addScore(meta, 0.3);
+  addScore(letterboxd, 0.3);
 
   if (totalWeight === 0) return null;
 

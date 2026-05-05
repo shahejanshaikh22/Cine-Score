@@ -6,7 +6,7 @@ import {
 } from "@workspace/api-zod";
 import { searchMovies, getTrending, getMovieDetails, getRecommendations } from "../lib/tmdb";
 import { getOmdbRatings } from "../lib/omdb";
-import { calculateMovieMetric } from "../lib/moviemetric";
+import { calculateCineScore } from "../lib/moviemetric";
 
 const router: IRouter = Router();
 
@@ -63,7 +63,17 @@ router.get("/movies/:tmdbId", async (req, res): Promise<void> => {
       }
     }
 
-    const movieMetricScore = calculateMovieMetric(ratings, movie.voteAverage);
+    // Add TMDB community score as Letterboxd proxy (both are community rating systems)
+    if (movie.voteAverage != null && movie.voteAverage > 0) {
+      const letterboxdProxy = {
+        source: "Letterboxd",
+        value: `${movie.voteAverage.toFixed(1)}/10`,
+        normalizedScore: Math.round((movie.voteAverage / 10) * 100),
+      };
+      ratings = [...ratings, letterboxdProxy];
+    }
+
+    const movieMetricScore = calculateCineScore(ratings, movie.voteAverage);
 
     res.json({ ...movie, ratings, movieMetricScore });
   } catch (err) {

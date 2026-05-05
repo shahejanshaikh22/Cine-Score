@@ -3,9 +3,10 @@ import { Layout } from "@/components/layout";
 import { useGetMovieDetails, useGetMovieRecommendations } from "@workspace/api-client-react";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { MovieCard } from "@/components/movie-card";
-import { SiImdb, SiRottentomatoes } from "react-icons/si";
-import { Clock, Calendar, Director as DirectorIcon, Users, BookmarkPlus, BookmarkCheck, Star } from "lucide-react";
+import { SiImdb, SiRottentomatoes, SiLetterboxd } from "react-icons/si";
+import { Clock, Calendar, Clapperboard, BookmarkPlus, BookmarkCheck, Star, ChevronDown, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export default function MovieDetail() {
   const [, params] = useRoute("/movie/:tmdbId");
@@ -63,7 +64,7 @@ export default function MovieDetail() {
     );
   }
 
-  const backdropUrl = movie.backdropPath 
+  const backdropUrl = movie.backdropPath
     ? `https://image.tmdb.org/t/p/original${movie.backdropPath}`
     : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop";
 
@@ -73,14 +74,23 @@ export default function MovieDetail() {
 
   const imdbRating = movie.ratings?.find(r => r.source === "IMDb");
   const rtRating = movie.ratings?.find(r => r.source === "Rotten Tomatoes");
+  const metaRating = movie.ratings?.find(r => r.source === "Metacritic");
+  const letterboxdRating = movie.ratings?.find(r => r.source === "Letterboxd");
+
+  const ratingBreakdown = [
+    { label: "IMDb", icon: <SiImdb className="w-5 h-5 text-[#F5C518]" />, rating: imdbRating, weight: "20%" },
+    { label: "Rotten Tomatoes", icon: <SiRottentomatoes className="w-5 h-5 text-[#FA320A]" />, rating: rtRating, weight: "20%" },
+    { label: "Metacritic", icon: <BarChart2 className="w-5 h-5 text-[#FFCC34]" />, rating: metaRating, weight: "30%" },
+    { label: "Letterboxd", icon: <SiLetterboxd className="w-5 h-5 text-[#00E054]" />, rating: letterboxdRating, weight: "30%" },
+  ];
 
   return (
     <Layout>
       {/* Hero Backdrop */}
       <div className="relative w-full h-[50vh] md:h-[70vh] bg-background">
         <div className="absolute inset-0 z-0">
-          <img 
-            src={backdropUrl} 
+          <img
+            src={backdropUrl}
             alt={`${movie.title} backdrop`}
             className="w-full h-full object-cover opacity-30"
           />
@@ -91,7 +101,7 @@ export default function MovieDetail() {
 
       <div className="container mx-auto px-4 relative z-10 -mt-32 md:-mt-64 mb-16">
         <div className="flex flex-col md:flex-row gap-8 items-start">
-          
+
           {/* Poster Column */}
           <div className="w-48 md:w-72 shrink-0 flex flex-col gap-4 mx-auto md:mx-0">
             <div className="aspect-[2/3] rounded-xl overflow-hidden border-4 border-background shadow-2xl bg-muted relative">
@@ -103,15 +113,16 @@ export default function MovieDetail() {
                 </div>
               )}
             </div>
-            
-            <Button 
-              onClick={handleWatchlistToggle} 
+
+            <Button
+              onClick={handleWatchlistToggle}
               variant={isSaved ? "secondary" : "default"}
               size="lg"
               className="w-full font-bold gap-2"
+              data-testid="button-watchlist-toggle"
             >
               {isSaved ? (
-                <><BookmarkCheck className="w-5 h-5" /> Saved to Watchlist</>
+                <><BookmarkCheck className="w-5 h-5" /> Saved</>
               ) : (
                 <><BookmarkPlus className="w-5 h-5" /> Add to Watchlist</>
               )}
@@ -152,20 +163,62 @@ export default function MovieDetail() {
             </div>
 
             {/* Ratings Dashboard */}
-            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 md:p-6 shadow-lg flex flex-wrap items-center gap-6 md:gap-12">
-              {/* MovieMetric Badge */}
-              <div className="flex flex-col gap-1 items-center md:items-start border-r border-border pr-6 md:pr-12">
-                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">MovieMetric</span>
+            <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 md:p-6 shadow-lg flex flex-wrap items-center gap-6 md:gap-10">
+
+              {/* CineScore Master Badge */}
+              <div className="flex flex-col gap-1 items-center md:items-start border-r border-border pr-6 md:pr-10">
+                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">CineScore</span>
                 <div className="flex items-center gap-2">
-                  <Star className="w-8 h-8 fill-primary text-primary" />
-                  <span className="text-3xl font-black bg-gradient-to-br from-primary to-amber-300 bg-clip-text text-transparent">
+                  <div className="relative">
+                    <Star className="w-8 h-8 fill-primary text-primary" style={{ filter: "drop-shadow(0 0 8px #39FF14)" }} />
+                  </div>
+                  <span
+                    className="text-3xl font-black text-primary"
+                    style={{ textShadow: "0 0 16px #39FF14, 0 0 32px #39FF1480" }}
+                  >
                     {movie.movieMetricScore ? movie.movieMetricScore.toFixed(0) : "N/A"}
                   </span>
                 </div>
+
+                {/* Ratings Breakdown Popover */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1 text-xs text-primary/70 hover:text-primary transition-colors mt-1 underline underline-offset-2 cursor-pointer" data-testid="button-score-breakdown">
+                      Score breakdown <ChevronDown className="w-3 h-3" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 bg-card border border-border shadow-2xl" align="start">
+                    <div className="p-3 border-b border-border">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">How CineScore is calculated</p>
+                    </div>
+                    <div className="p-2 flex flex-col gap-1">
+                      {ratingBreakdown.map(({ label, icon, rating, weight }) => (
+                        <div key={label} className="flex items-center justify-between px-2 py-2 rounded-md hover:bg-muted/40 transition-colors">
+                          <div className="flex items-center gap-2">
+                            {icon}
+                            <span className="text-sm font-medium">{label}</span>
+                            <span className="text-xs text-muted-foreground">({weight})</span>
+                          </div>
+                          <span className="text-sm font-bold text-foreground">
+                            {rating?.value ?? <span className="text-muted-foreground text-xs">N/A</span>}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="px-4 py-3 bg-muted/30 border-t border-border rounded-b-xl">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Master Score</span>
+                        <span className="text-lg font-black text-primary" style={{ textShadow: "0 0 8px #39FF14" }}>
+                          {movie.movieMetricScore ? `${movie.movieMetricScore.toFixed(0)}/100` : "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {imdbRating && (
-                <div className="flex flex-col gap-1 items-center">
+                <div className="flex flex-col gap-1 items-center" data-testid="rating-imdb">
                   <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">IMDb</span>
                   <div className="flex items-center gap-2">
                     <SiImdb className="w-8 h-8 text-[#F5C518]" />
@@ -175,11 +228,21 @@ export default function MovieDetail() {
               )}
 
               {rtRating && (
-                <div className="flex flex-col gap-1 items-center">
+                <div className="flex flex-col gap-1 items-center" data-testid="rating-rt">
                   <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Tomatometer</span>
                   <div className="flex items-center gap-2">
                     <SiRottentomatoes className="w-8 h-8 text-[#FA320A]" />
                     <span className="text-xl font-bold">{rtRating.value}</span>
+                  </div>
+                </div>
+              )}
+
+              {metaRating && (
+                <div className="flex flex-col gap-1 items-center" data-testid="rating-meta">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Metacritic</span>
+                  <div className="flex items-center gap-2">
+                    <BarChart2 className="w-8 h-8 text-[#FFCC34]" />
+                    <span className="text-xl font-bold">{metaRating.value}</span>
                   </div>
                 </div>
               )}
@@ -198,14 +261,14 @@ export default function MovieDetail() {
               {movie.director && (
                 <div>
                   <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
-                    Director
+                    <Clapperboard className="w-4 h-4" /> Director
                   </h3>
                   <p className="font-medium text-lg">{movie.director}</p>
                 </div>
               )}
               {movie.cast && movie.cast.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                     Top Cast
                   </h3>
                   <p className="font-medium text-foreground/80 leading-relaxed">
@@ -222,7 +285,7 @@ export default function MovieDetail() {
       {recs?.results && recs.results.length > 0 && (
         <div className="container mx-auto px-4 py-12 border-t border-border/30">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <span className="w-2 h-6 bg-primary rounded-sm inline-block"></span>
+            <span className="w-2 h-6 bg-primary rounded-sm inline-block" style={{ boxShadow: "0 0 8px #39FF14" }}></span>
             Similar Movies
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

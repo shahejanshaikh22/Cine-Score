@@ -1,10 +1,9 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Film, Bookmark, Popcorn } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, Bookmark, Clapperboard } from "lucide-react";
 
 export function Layout({ children }: { children: ReactNode }) {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,15 +18,15 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-[100dvh] flex flex-col bg-background text-foreground dark">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight transition-opacity hover:opacity-80">
-            <Popcorn className="h-6 w-6" />
-            <span>Cinescore</span>
+          <Link href="/" className="flex items-center gap-2 text-primary font-black text-xl tracking-tight transition-opacity hover:opacity-80">
+            <Clapperboard className="h-6 w-6" />
+            <span>CineScore</span>
           </Link>
-          
+
           <div className="flex-1 max-w-md mx-auto hidden md:block">
             <form onSubmit={handleSearch} className="relative group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input 
+              <input
                 name="q"
                 type="search"
                 placeholder="Search movies..."
@@ -43,12 +42,12 @@ export function Layout({ children }: { children: ReactNode }) {
             </Link>
           </div>
         </div>
-        
+
         {/* Mobile Search */}
         <div className="md:hidden border-t border-border/40 p-2 px-4 bg-background">
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input 
+            <input
               name="q"
               type="search"
               placeholder="Search movies..."
@@ -57,19 +56,22 @@ export function Layout({ children }: { children: ReactNode }) {
           </form>
         </div>
       </header>
-      
+
       <main className="flex-1 flex flex-col">
         {children}
       </main>
-      
-      <footer className="border-t border-border/40 py-8 bg-card/30 mt-auto">
-        <div className="container mx-auto px-4 flex flex-col items-center justify-center gap-4 text-muted-foreground">
-          <div className="flex items-center gap-2 font-semibold">
-            <Popcorn className="h-5 w-5" />
-            Cinescore
+
+      <footer className="border-t border-primary/20 py-10 bg-card/30 mt-auto">
+        <div className="container mx-auto px-4 flex flex-col items-center justify-center gap-3 text-center">
+          <div className="flex items-center gap-2 text-primary font-black text-lg tracking-tight">
+            <Clapperboard className="h-5 w-5" />
+            CineScore
           </div>
-          <p className="text-sm text-center">
-            The cinematic command center for movie lovers.
+          <p className="text-sm text-muted-foreground max-w-md">
+            Developed by Team CineScore | B.Tech CSE Honours AIML | Sage University, Bhopal
+          </p>
+          <p className="text-xs text-muted-foreground/60">
+            Built for film enthusiasts, by film enthusiasts.
           </p>
         </div>
       </footer>
