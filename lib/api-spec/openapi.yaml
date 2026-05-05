@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Cinescore - Movie Rating Aggregator API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: movies
+    description: Movie search, details, and ratings
+  - name: recommendations
+    description: AI-powered movie recommendations
 paths:
   /healthz:
     get:
@@ -24,6 +28,106 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /movies/search:
+    get:
+      operationId: searchMovies
+      tags: [movies]
+      summary: Search movies
+      description: Search for movies using TMDB API
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieSearchResult"
+        "400":
+          description: Missing query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /movies/trending:
+    get:
+      operationId: getTrendingMovies
+      tags: [movies]
+      summary: Get trending movies
+      description: Fetches currently trending movies from TMDB
+      responses:
+        "200":
+          description: Trending movies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieSearchResult"
+
+  /movies/{tmdbId}:
+    get:
+      operationId: getMovieDetails
+      tags: [movies]
+      summary: Get movie details
+      description: Fetch full movie details including TMDB metadata and OMDb ratings
+      parameters:
+        - name: tmdbId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Movie details with ratings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieDetail"
+        "404":
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /movies/{tmdbId}/recommendations:
+    get:
+      operationId: getMovieRecommendations
+      tags: [recommendations]
+      summary: Get content-based recommendations
+      description: Returns 5 similar movies based on genre and plot via TMDB
+      parameters:
+        - name: tmdbId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Recommended movies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationsResult"
+        "404":
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +138,155 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    MovieSummary:
+      type: object
+      properties:
+        tmdbId:
+          type: integer
+        title:
+          type: string
+        year:
+          type: ["string", "null"]
+        overview:
+          type: ["string", "null"]
+        posterPath:
+          type: ["string", "null"]
+        backdropPath:
+          type: ["string", "null"]
+        genres:
+          type: array
+          items:
+            type: string
+        voteAverage:
+          type: ["number", "null"]
+        popularity:
+          type: ["number", "null"]
+      required:
+        - tmdbId
+        - title
+        - year
+        - overview
+        - posterPath
+        - backdropPath
+        - genres
+        - voteAverage
+        - popularity
+
+    RatingSource:
+      type: object
+      properties:
+        source:
+          type: string
+        value:
+          type: ["string", "null"]
+        normalizedScore:
+          type: ["number", "null"]
+      required:
+        - source
+        - value
+        - normalizedScore
+
+    MovieDetail:
+      type: object
+      properties:
+        tmdbId:
+          type: integer
+        imdbId:
+          type: ["string", "null"]
+        title:
+          type: string
+        year:
+          type: ["string", "null"]
+        overview:
+          type: ["string", "null"]
+        posterPath:
+          type: ["string", "null"]
+        backdropPath:
+          type: ["string", "null"]
+        genres:
+          type: array
+          items:
+            type: string
+        runtime:
+          type: ["integer", "null"]
+        director:
+          type: ["string", "null"]
+        cast:
+          type: array
+          items:
+            type: string
+        voteAverage:
+          type: ["number", "null"]
+        popularity:
+          type: ["number", "null"]
+        ratings:
+          type: array
+          items:
+            $ref: "#/components/schemas/RatingSource"
+        movieMetricScore:
+          type: ["number", "null"]
+        tagline:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        budget:
+          type: ["integer", "null"]
+        revenue:
+          type: ["integer", "null"]
+      required:
+        - tmdbId
+        - imdbId
+        - title
+        - year
+        - overview
+        - posterPath
+        - backdropPath
+        - genres
+        - runtime
+        - director
+        - cast
+        - voteAverage
+        - popularity
+        - ratings
+        - movieMetricScore
+        - tagline
+        - status
+        - budget
+        - revenue
+
+    MovieSearchResult:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/MovieSummary"
+        totalResults:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+        - results
+        - totalResults
+        - page
+        - totalPages
+
+    RecommendationsResult:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/MovieSummary"
+      required:
+        - results

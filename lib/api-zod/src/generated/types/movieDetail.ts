@@ -5,39 +5,7 @@
  * Cinescore - Movie Rating Aggregator API
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
-
-export interface ErrorResponse {
-  error: string;
-}
-
-export interface MovieSummary {
-  tmdbId: number;
-  title: string;
-  /** @nullable */
-  year: string | null;
-  /** @nullable */
-  overview: string | null;
-  /** @nullable */
-  posterPath: string | null;
-  /** @nullable */
-  backdropPath: string | null;
-  genres: string[];
-  /** @nullable */
-  voteAverage: number | null;
-  /** @nullable */
-  popularity: number | null;
-}
-
-export interface RatingSource {
-  source: string;
-  /** @nullable */
-  value: string | null;
-  /** @nullable */
-  normalizedScore: number | null;
-}
+import type { RatingSource } from "./ratingSource";
 
 export interface MovieDetail {
   tmdbId: number;
@@ -74,22 +42,3 @@ export interface MovieDetail {
   /** @nullable */
   revenue: number | null;
 }
-
-export interface MovieSearchResult {
-  results: MovieSummary[];
-  totalResults: number;
-  page: number;
-  totalPages: number;
-}
-
-export interface RecommendationsResult {
-  results: MovieSummary[];
-}
-
-export type SearchMoviesParams = {
-  /**
-   * Search query
-   */
-  q: string;
-  page?: number;
-};

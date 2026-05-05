@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Cinescore"
+version = "1.0.0"
+id = "artifacts/cinescore"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23623
+
+[services.development]
+run = "pnpm --filter @workspace/cinescore run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cinescore", "run", "build" ]
+publicDir = "artifacts/cinescore/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23623"
+BASE_PATH = "/"
