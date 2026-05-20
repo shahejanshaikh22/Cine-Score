@@ -2,7 +2,7 @@ import { useGetTrendingMovies } from "@workspace/api-client-react";
 import { MovieCard, MovieCardSkeleton } from "@/components/movie-card";
 import { Layout } from "@/components/layout";
 import { useLocation, Link } from "wouter";
-import { Search, Star, Award } from "lucide-react";
+import { Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PICK_OF_THE_WEEK = {
@@ -15,7 +15,6 @@ const PICK_OF_THE_WEEK = {
   backdropPath: "/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg",
   genres: ["Drama", "Crime"],
   voteAverage: 8.7,
-  popularity: 189.4,
 };
 
 export default function Home() {
@@ -34,107 +33,95 @@ export default function Home() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative w-full py-20 md:py-32 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background z-10" />
-        <div
-          className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20"
-        />
+      <section className="w-full py-24 md:py-36 px-6">
+        <div className="container mx-auto max-w-3xl flex flex-col gap-8">
+          <div className="flex flex-col gap-4">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+              The Cinema Record
+            </p>
+            <h1 className="font-serif text-5xl md:text-7xl font-normal leading-[1.08] tracking-tight text-foreground">
+              Discover the<br />
+              <em className="text-primary not-italic">Cinematic</em> Universe
+            </h1>
+            <p className="text-base text-muted-foreground max-w-lg leading-relaxed mt-1">
+              Ratings, reviews, and recommendations from every major source — unified into one score.
+            </p>
+          </div>
 
-        <div className="relative z-20 container px-4 mx-auto flex flex-col items-center text-center gap-6 max-w-3xl">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground drop-shadow-md">
-            Discover the <span className="text-primary" style={{ textShadow: "0 0 24px #39FF14, 0 0 48px #39FF1440" }}>Cinematic</span> Universe
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-xl">
-            Your command center for movie ratings, reviews, and recommendations.
-            Find out what's worth watching.
-          </p>
-
-          <form onSubmit={handleHeroSearch} className="w-full max-w-2xl relative flex items-center" data-testid="form-hero-search">
-            <Search className="absolute left-4 h-5 w-5 text-muted-foreground" />
-            <input
-              name="q"
-              type="search"
-              placeholder="Search for movies, directors, or actors..."
-              className="w-full h-14 bg-card/80 backdrop-blur-md border border-border rounded-full pl-12 pr-32 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-xl"
-              data-testid="input-hero-search"
-            />
-            <Button type="submit" className="absolute right-1.5 rounded-full h-11 px-6 font-semibold" data-testid="button-hero-search">
+          <form onSubmit={handleHeroSearch} className="flex items-center gap-2 max-w-xl" data-testid="form-hero-search">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+              <input
+                name="q"
+                type="search"
+                placeholder="Search for movies, directors, or actors..."
+                className="w-full h-12 bg-card border border-border/60 rounded pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary/60 focus:border-primary/60 transition-all"
+                data-testid="input-hero-search"
+              />
+            </div>
+            <Button type="submit" className="h-12 px-6 rounded font-medium text-sm" data-testid="button-hero-search">
               Search
             </Button>
           </form>
         </div>
       </section>
 
+      {/* Thin divider */}
+      <div className="container mx-auto px-6">
+        <div className="border-t border-border/20" />
+      </div>
+
       {/* CineScore Pick of the Week */}
-      <section className="container mx-auto px-4 py-10">
-        <div className="flex items-center gap-2 mb-6">
-          <Award className="w-6 h-6 text-primary" style={{ filter: "drop-shadow(0 0 6px #39FF14)" }} />
-          <h2 className="text-2xl md:text-3xl font-bold">CineScore Pick of the Week</h2>
+      <section className="container mx-auto px-6 py-16">
+        <div className="mb-8">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">Editor's Selection</p>
+          <h2 className="text-xl font-semibold text-foreground">Pick of the Week</h2>
         </div>
 
         <Link href={`/movie/${PICK_OF_THE_WEEK.tmdbId}`} className="group block">
-          <div className="relative rounded-2xl overflow-hidden border border-primary/30 bg-card shadow-lg transition-all duration-300 group-hover:border-primary/60"
-            style={{ boxShadow: "0 0 0 1px rgba(57,255,20,0.1), 0 4px 24px rgba(57,255,20,0.08)" }}
-          >
-            {/* Backdrop */}
-            <div className="absolute inset-0">
-              <img
-                src={`https://image.tmdb.org/t/p/original${PICK_OF_THE_WEEK.backdropPath}`}
-                alt={PICK_OF_THE_WEEK.title}
-                className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-card via-card/90 to-card/30" />
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 flex flex-col sm:flex-row gap-6 p-6 md:p-8 items-start">
-              <img
-                src={`https://image.tmdb.org/t/p/w500${PICK_OF_THE_WEEK.posterPath}`}
-                alt={PICK_OF_THE_WEEK.title}
-                className="w-28 sm:w-36 aspect-[2/3] rounded-lg object-cover shadow-2xl shrink-0 border-2 border-primary/20"
-              />
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-primary px-2 py-0.5 border border-primary/40 rounded-full"
-                    style={{ boxShadow: "0 0 8px rgba(57,255,20,0.3)" }}>
-                    Editor's Pick
-                  </span>
-                </div>
-                <h3 className="text-2xl md:text-3xl font-black text-foreground group-hover:text-primary transition-colors">
-                  {PICK_OF_THE_WEEK.title}
-                </h3>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span>{PICK_OF_THE_WEEK.year}</span>
-                  <span>•</span>
-                  {PICK_OF_THE_WEEK.genres.map(g => (
-                    <span key={g} className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-xs font-semibold">
-                      {g}
-                    </span>
-                  ))}
-                  <span className="flex items-center gap-1 ml-1 font-bold text-primary">
-                    <Star className="w-4 h-4 fill-primary" />
-                    {PICK_OF_THE_WEEK.voteAverage}
-                  </span>
-                </div>
-                <p className="text-muted-foreground leading-relaxed text-sm md:text-base line-clamp-3 max-w-2xl">
-                  {PICK_OF_THE_WEEK.overview}
-                </p>
-                <span className="text-primary text-sm font-semibold group-hover:underline underline-offset-4 mt-1">
-                  View full details &rarr;
+          <div className="flex flex-col sm:flex-row gap-6 p-6 border border-border/30 rounded hover:border-border/60 transition-colors duration-300">
+            <img
+              src={`https://image.tmdb.org/t/p/w500${PICK_OF_THE_WEEK.posterPath}`}
+              alt={PICK_OF_THE_WEEK.title}
+              className="w-24 sm:w-32 aspect-[2/3] rounded object-cover shrink-0 opacity-90 group-hover:opacity-100 transition-opacity"
+            />
+            <div className="flex flex-col gap-3 justify-center">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider">
+                <span>{PICK_OF_THE_WEEK.year}</span>
+                <span>&middot;</span>
+                {PICK_OF_THE_WEEK.genres.map(g => (
+                  <span key={g}>{g}</span>
+                ))}
+                <span>&middot;</span>
+                <span className="flex items-center gap-1 text-primary font-medium">
+                  <Star className="w-3 h-3 fill-primary" />
+                  {PICK_OF_THE_WEEK.voteAverage}
                 </span>
               </div>
+              <h3 className="font-serif text-2xl md:text-3xl font-normal text-foreground group-hover:text-primary transition-colors">
+                {PICK_OF_THE_WEEK.title}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 max-w-2xl">
+                {PICK_OF_THE_WEEK.overview}
+              </p>
+              <span className="text-xs text-primary font-medium mt-1 group-hover:underline underline-offset-4">
+                View full details &rarr;
+              </span>
             </div>
           </div>
         </Link>
       </section>
 
+      {/* Thin divider */}
+      <div className="container mx-auto px-6">
+        <div className="border-t border-border/20" />
+      </div>
+
       {/* Trending Section */}
-      <section className="container mx-auto px-4 py-12 md:py-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-            <span className="w-2 h-8 bg-primary rounded-sm inline-block" style={{ boxShadow: "0 0 8px #39FF14" }}></span>
-            Trending Now
-          </h2>
+      <section className="container mx-auto px-6 py-16">
+        <div className="mb-8">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">What's popular</p>
+          <h2 className="text-xl font-semibold text-foreground">Trending Now</h2>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">

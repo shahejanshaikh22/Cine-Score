@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useSearchMovies } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
@@ -16,15 +15,18 @@ export default function SearchPage() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Search Results</h1>
-          {q ? (
-            <p className="text-muted-foreground">
-              Showing results for <span className="text-foreground font-medium">"{q}"</span>
-            </p>
-          ) : (
-            <p className="text-muted-foreground">Enter a search term to find movies.</p>
+      <div className="container mx-auto px-6 py-12">
+        <div className="mb-10 border-b border-border/20 pb-6">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">Results</p>
+          <h1 className="font-serif text-3xl font-normal text-foreground">
+            {q ? (
+              <><em className="not-italic text-muted-foreground/60">for</em> "{q}"</>
+            ) : (
+              "Search"
+            )}
+          </h1>
+          {!q && (
+            <p className="text-sm text-muted-foreground mt-2">Enter a search term to find movies.</p>
           )}
         </div>
 
@@ -35,7 +37,7 @@ export default function SearchPage() {
                 <MovieCardSkeleton key={i} />
               ))
             ) : error ? (
-              <div className="col-span-full py-12 text-center text-destructive">
+              <div className="col-span-full py-12 text-center text-destructive text-sm">
                 An error occurred while searching.
               </div>
             ) : data?.results && data.results.length > 0 ? (
@@ -43,7 +45,7 @@ export default function SearchPage() {
                 <MovieCard key={movie.tmdbId} movie={movie} />
               ))
             ) : (
-              <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/20 rounded-xl border border-border/50">
+              <div className="col-span-full py-16 text-center text-muted-foreground/60 text-sm border border-border/20 rounded">
                 No movies found matching your query.
               </div>
             )}

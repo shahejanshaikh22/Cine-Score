@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { MovieCard } from "@/components/movie-card";
-import { Bookmark, Popcorn } from "lucide-react";
+import { Bookmark, Film } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
@@ -10,12 +10,15 @@ export default function WatchlistPage() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 md:py-12 flex-1 flex flex-col">
-        <div className="mb-8 flex items-center gap-3">
-          <Bookmark className="w-8 h-8 text-primary" />
+      <div className="container mx-auto px-6 py-12 flex-1 flex flex-col">
+        <div className="mb-10 border-b border-border/20 pb-6 flex items-start gap-3">
+          <Bookmark className="w-5 h-5 text-primary mt-1" strokeWidth={1.5} />
           <div>
-            <h1 className="text-3xl font-bold">Your Watchlist</h1>
-            <p className="text-muted-foreground">Movies you want to watch later.</p>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-1">Your collection</p>
+            <h1 className="font-serif text-3xl font-normal text-foreground">Watchlist</h1>
+            {watchlist.length > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">{watchlist.length} {watchlist.length === 1 ? "film" : "films"} saved</p>
+            )}
           </div>
         </div>
 
@@ -26,17 +29,14 @@ export default function WatchlistPage() {
             ))}
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4 bg-muted/10 rounded-2xl border border-border/50 border-dashed">
-            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6">
-              <Popcorn className="w-10 h-10 text-muted-foreground/50" />
-            </div>
-            <h2 className="text-2xl font-semibold mb-2">Your watchlist is empty</h2>
-            <p className="text-muted-foreground max-w-md mb-8">
-              Looks like you haven't added any movies to your watchlist yet. 
-              Explore trending movies or search for your favorites to save them here.
+          <div className="flex-1 flex flex-col items-center justify-center text-center py-24 px-4">
+            <Film className="w-10 h-10 text-muted-foreground/30 mb-6" strokeWidth={1} />
+            <h2 className="font-serif text-2xl font-normal text-foreground mb-2">Nothing saved yet</h2>
+            <p className="text-sm text-muted-foreground max-w-xs mb-8 leading-relaxed">
+              Add movies to your watchlist as you browse — they'll appear here for easy access.
             </p>
             <Link href="/">
-              <Button size="lg" className="font-semibold">
+              <Button size="sm" className="rounded font-medium px-6">
                 Explore Movies
               </Button>
             </Link>
