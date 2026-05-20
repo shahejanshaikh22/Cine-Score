@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "sHPOuXPkxo-uxGF7p2G7O"
+uri = "file://artifacts/mockup-sandbox/public/images/shawshank.png"
+type = "image"
+title = "Shawshank Redemption poster"
