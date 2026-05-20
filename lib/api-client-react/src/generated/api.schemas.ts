@@ -82,6 +82,11 @@ export interface MovieSearchResult {
   totalPages: number;
 }
 
+export interface MovieReview {
+  review: string;
+  generatedAt: string;
+}
+
 export interface RecommendationsResult {
   results: MovieSummary[];
 }

@@ -102,6 +102,38 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /movies/{tmdbId}/review:
+    get:
+      operationId: getMovieReview
+      tags: [movies]
+      summary: Generate AI critical analysis
+      description: Uses AI to generate a short critical analysis of the movie based on its ratings and metadata
+      parameters:
+        - name: tmdbId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI-generated review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieReview"
+        "404":
+          description: Movie not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: AI generation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /movies/{tmdbId}/recommendations:
     get:
       operationId: getMovieRecommendations
@@ -280,6 +312,17 @@ components:
         - totalResults
         - page
         - totalPages
+
+    MovieReview:
+      type: object
+      properties:
+        review:
+          type: string
+        generatedAt:
+          type: string
+      required:
+        - review
+        - generatedAt
 
     RecommendationsResult:
       type: object

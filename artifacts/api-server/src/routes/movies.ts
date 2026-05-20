@@ -7,6 +7,7 @@ import {
 import { searchMovies, getTrending, getMovieDetails, getRecommendations } from "../lib/tmdb";
 import { getOmdbRatings } from "../lib/omdb";
 import { calculateCineScore } from "../lib/moviemetric";
+import { openai } from "@workspace/integrations-openai-ai-server";
 
 const router: IRouter = Router();
 
@@ -79,6 +80,58 @@ router.get("/movies/:tmdbId", async (req, res): Promise<void> => {
   } catch (err) {
     req.log.error({ err, tmdbId }, "Failed to fetch movie details");
     res.status(404).json({ error: "Movie not found" });
+  }
+});
+
+router.get("/movies/:tmdbId/review", async (req, res): Promise<void> => {
+  const parsed = GetMovieDetailsParams.safeParse(req.params);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { tmdbId } = parsed.data;
+
+  try {
+    const movie = await getMovieDetails(tmdbId);
+
+    let ratings: Awaited<ReturnType<typeof getOmdbRatings>> = [];
+    if (movie.imdbId) {
+      try {
+        ratings = await getOmdbRatings(movie.imdbId);
+      } catch {
+        // ratings optional for review
+      }
+    }
+
+    const ratingSummary = ratings.length > 0
+      ? ratings.map(r => `${r.source}: ${r.value}`).join(", ")
+      : "ratings unavailable";
+
+    const prompt = `You are a concise, sharp film critic writing for a premium cinema publication. Write a critical analysis of "${movie.title}" (${movie.year ?? "unknown year"}).
+
+Film details:
+- Director: ${movie.director ?? "unknown"}
+- Genres: ${movie.genres?.join(", ") ?? "unknown"}
+- Cast: ${movie.cast?.slice(0, 4).join(", ") ?? "unknown"}
+- Runtime: ${movie.runtime ? `${movie.runtime} minutes` : "unknown"}
+- Ratings: ${ratingSummary}
+- Plot: ${movie.overview ?? "no overview available"}
+
+Write a 3–4 sentence critical analysis. Be specific about what the film does well or poorly. Reference the ratings context. Use precise, evocative language. Do not use generic phrases like "a must-watch" or "this film is a masterpiece". Do not start with the film title. Write in third person.`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5.1",
+      max_completion_tokens: 300,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const review = completion.choices[0]?.message?.content ?? "Unable to generate analysis.";
+
+    res.json({ review, generatedAt: new Date().toISOString() });
+  } catch (err) {
+    req.log.error({ err, tmdbId }, "Failed to generate movie review");
+    res.status(500).json({ error: "Failed to generate review" });
   }
 });
 

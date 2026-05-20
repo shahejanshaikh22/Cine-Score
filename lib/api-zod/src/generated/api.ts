@@ -105,6 +105,19 @@ export const GetMovieDetailsResponse = zod.object({
 });
 
 /**
+ * Uses AI to generate a short critical analysis of the movie based on its ratings and metadata
+ * @summary Generate AI critical analysis
+ */
+export const GetMovieReviewParams = zod.object({
+  tmdbId: zod.coerce.number(),
+});
+
+export const GetMovieReviewResponse = zod.object({
+  review: zod.string(),
+  generatedAt: zod.string(),
+});
+
+/**
  * Returns 5 similar movies based on genre and plot via TMDB
  * @summary Get content-based recommendations
  */

@@ -9,6 +9,7 @@
 export * from "./errorResponse";
 export * from "./healthStatus";
 export * from "./movieDetail";
+export * from "./movieReview";
 export * from "./movieSearchResult";
 export * from "./movieSummary";
 export * from "./ratingSource";

@@ -17,6 +17,7 @@ import type {
   ErrorResponse,
   HealthStatus,
   MovieDetail,
+  MovieReview,
   MovieSearchResult,
   RecommendationsResult,
   SearchMoviesParams,
@@ -358,6 +359,94 @@ export function useGetMovieDetails<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetMovieDetailsQueryOptions(tmdbId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Uses AI to generate a short critical analysis of the movie based on its ratings and metadata
+ * @summary Generate AI critical analysis
+ */
+export const getGetMovieReviewUrl = (tmdbId: number) => {
+  return `/api/movies/${tmdbId}/review`;
+};
+
+export const getMovieReview = async (
+  tmdbId: number,
+  options?: RequestInit,
+): Promise<MovieReview> => {
+  return customFetch<MovieReview>(getGetMovieReviewUrl(tmdbId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMovieReviewQueryKey = (tmdbId: number) => {
+  return [`/api/movies/${tmdbId}/review`] as const;
+};
+
+export const getGetMovieReviewQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMovieReview>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  tmdbId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMovieReview>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMovieReviewQueryKey(tmdbId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMovieReview>>> = ({
+    signal,
+  }) => getMovieReview(tmdbId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!tmdbId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMovieReview>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMovieReviewQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMovieReview>>
+>;
+export type GetMovieReviewQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate AI critical analysis
+ */
+
+export function useGetMovieReview<
+  TData = Awaited<ReturnType<typeof getMovieReview>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  tmdbId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMovieReview>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMovieReviewQueryOptions(tmdbId, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

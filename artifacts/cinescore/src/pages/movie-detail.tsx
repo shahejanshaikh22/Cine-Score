@@ -1,10 +1,10 @@
 import { useRoute } from "wouter";
 import { Layout } from "@/components/layout";
-import { useGetMovieDetails, useGetMovieRecommendations } from "@workspace/api-client-react";
+import { useGetMovieDetails, useGetMovieRecommendations, useGetMovieReview } from "@workspace/api-client-react";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { MovieCard } from "@/components/movie-card";
 import { SiImdb, SiRottentomatoes, SiLetterboxd } from "react-icons/si";
-import { Clock, Calendar, Clapperboard, BookmarkPlus, BookmarkCheck, Star, ChevronDown, BarChart2 } from "lucide-react";
+import { Clock, Calendar, Clapperboard, BookmarkPlus, BookmarkCheck, Star, ChevronDown, BarChart2, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -18,6 +18,14 @@ export default function MovieDetail() {
 
   const { data: recs } = useGetMovieRecommendations(tmdbId, {
     query: { enabled: !!tmdbId }
+  });
+
+  const {
+    data: reviewData,
+    isFetching: isGeneratingReview,
+    refetch: generateReview,
+  } = useGetMovieReview(tmdbId, {
+    query: { enabled: false }
   });
 
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
@@ -85,7 +93,7 @@ export default function MovieDetail() {
 
   return (
     <Layout>
-      {/* Backdrop — subtle, darkened */}
+      {/* Backdrop */}
       {backdropUrl && (
         <div className="relative w-full h-[35vh] overflow-hidden">
           <img
@@ -165,7 +173,6 @@ export default function MovieDetail() {
 
             {/* Ratings Dashboard */}
             <div className="border border-border/30 rounded p-4 md:p-6 flex flex-wrap items-center gap-6 md:gap-10">
-
               {/* CineScore Master Badge */}
               <div className="flex flex-col gap-1 items-start border-r border-border/30 pr-6 md:pr-10">
                 <span className="text-xs text-muted-foreground uppercase tracking-[0.15em]">CineScore</span>
@@ -269,6 +276,62 @@ export default function MovieDetail() {
                     {movie.cast.slice(0, 5).join(", ")}
                   </p>
                 </div>
+              )}
+            </div>
+
+            {/* AI Critical Analysis */}
+            <div className="border-t border-border/20 pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground mb-0.5">CineScore Analysis</h3>
+                  <p className="text-xs text-muted-foreground/50">AI-generated critical perspective</p>
+                </div>
+                {!reviewData && (
+                  <Button
+                    onClick={() => generateReview()}
+                    disabled={isGeneratingReview}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 rounded text-xs border-border/50 hover:border-primary/50 hover:text-primary"
+                  >
+                    {isGeneratingReview ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating...</>
+                    ) : (
+                      <><Sparkles className="w-3.5 h-3.5" /> Generate Analysis</>
+                    )}
+                  </Button>
+                )}
+              </div>
+
+              {isGeneratingReview && (
+                <div className="flex flex-col gap-2">
+                  <div className="h-4 bg-muted/40 rounded animate-pulse w-full" />
+                  <div className="h-4 bg-muted/40 rounded animate-pulse w-5/6" />
+                  <div className="h-4 bg-muted/40 rounded animate-pulse w-4/5" />
+                  <div className="h-4 bg-muted/30 rounded animate-pulse w-3/4 mt-1" />
+                  <div className="h-4 bg-muted/30 rounded animate-pulse w-full" />
+                  <div className="h-4 bg-muted/30 rounded animate-pulse w-2/3" />
+                </div>
+              )}
+
+              {reviewData && !isGeneratingReview && (
+                <div className="flex flex-col gap-4">
+                  <p className="font-serif text-base text-foreground/80 leading-relaxed italic">
+                    {reviewData.review}
+                  </p>
+                  <button
+                    onClick={() => generateReview()}
+                    className="self-start text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors flex items-center gap-1"
+                  >
+                    <Sparkles className="w-3 h-3" /> Regenerate
+                  </button>
+                </div>
+              )}
+
+              {!reviewData && !isGeneratingReview && (
+                <p className="text-sm text-muted-foreground/40 italic font-serif">
+                  Click "Generate Analysis" for a critical perspective on this film based on its ratings and themes.
+                </p>
               )}
             </div>
           </div>
