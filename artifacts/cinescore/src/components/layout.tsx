@@ -1,9 +1,11 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Bookmark, Clapperboard } from "lucide-react";
+import { Search, Bookmark, Clapperboard, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 
 export function Layout({ children }: { children: ReactNode }) {
   const [, setLocation] = useLocation();
+  const { theme, toggle } = useTheme();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -15,7 +17,7 @@ export function Layout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-background text-foreground dark">
+    <div className={`min-h-[100dvh] flex flex-col bg-background text-foreground ${theme}`}>
       <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/95 backdrop-blur">
         <div className="container mx-auto px-6 h-14 flex items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-2.5 text-foreground font-semibold text-base tracking-tight transition-opacity hover:opacity-70">
@@ -40,6 +42,18 @@ export function Layout({ children }: { children: ReactNode }) {
               <Bookmark className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Watchlist</span>
             </Link>
+
+            <button
+              onClick={toggle}
+              aria-label="Toggle theme"
+              className="inline-flex items-center justify-center h-9 w-9 rounded text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </button>
           </div>
         </div>
 
